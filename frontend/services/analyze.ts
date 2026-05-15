@@ -9,17 +9,15 @@ export type AnalysisState =
 
 export async function runAnalysis(
   file: File,
-  lang: string,
   onStateChange: (state: AnalysisState) => void,
 ) {
   try {
     onStateChange({ stage: "uploading" });
     onStateChange({ stage: "analyzing" });
-
-    const result = await uploadResume(file, lang);
+    const result = await uploadResume(file);
     onStateChange({ stage: "done", result });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Something went wrong.";
+    const message = err instanceof Error ? err.message : "分析失败";
     onStateChange({ stage: "error", message });
   }
 }

@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.routes.upload import router as upload_router
+from app.routes.auth import router as auth_router
+from app.routes.history import router as history_router
 
 app = FastAPI(
     title="AI Resume Analyzer API",
@@ -18,6 +20,8 @@ app.add_middleware(
 )
 
 app.include_router(upload_router, prefix="/api")
+app.include_router(auth_router, prefix="/api")
+app.include_router(history_router, prefix="/api")
 
 
 @app.get("/api/health")

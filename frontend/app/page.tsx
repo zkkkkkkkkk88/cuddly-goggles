@@ -1,22 +1,74 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Hero from "@/components/Hero";
 import UploadZone from "@/components/UploadZone";
 import AnalysisResult from "@/components/AnalysisResult";
+import HistoryPanel from "@/components/HistoryPanel";
 import { runAnalysis, AnalysisState } from "@/services/analyze";
+import { isLoggedIn, logout } from "@/services/auth";
+import { AnalysisResult as AnalysisResultType } from "@/lib/api";
+import { LogOut, History } from "lucide-react";
 
 export default function HomePage() {
+  const router = useRouter();
+  const [user, setUser] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   const [state, setState] = useState<AnalysisState>({ stage: "idle" });
+  const [showHistory, setShowHistory] = useState(false);
+
+  useEffect(() => {
+    if (!isLoggedIn()) {
+      router.replace("/login");
+    } else {
+      setUser(localStorage.getItem("resume_ai_email"));
+    }
+    setMounted(true);
+  }, [router]);
 
   const handleFileSelect = useCallback((file: File) => {
-    runAnalysis(file, "zh", setState);
+    runAnalysis(file, setState);
   }, []);
 
   const handleReset = () => setState({ stage: "idle" });
 
+  const handleLogout = () => {
+    logout();
+    localStorage.removeItem("resume_ai_email");
+    router.replace("/login");
+  };
+
+  const handleHistorySelect = (result: AnalysisResultType) => {
+    setShowHistory(false);
+    setState({ stage: "done", result });
+  };
+
+  if (!mounted) return null;
+
   return (
     <main className="min-h-screen pb-24">
+      {/* User bar */}
+      <div className="max-w-4xl mx-auto px-6 pt-4 flex justify-end items-center gap-3">
+        {user && (
+          <>
+            <span className="text-xs font-bold text-deco-warmgray">{user}</span>
+            <button
+              onClick={() => setShowHistory(true)}
+              className="flex items-center gap-1 text-xs font-bold text-deco-navy hover:text-deco-brass transition-colors"
+            >
+              <History className="w-3 h-3" /> 历史
+            </button>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1 text-xs font-bold text-deco-warmgray hover:text-deco-rose transition-colors"
+            >
+              <LogOut className="w-3 h-3" /> 退出
+            </button>
+          </>
+        )}
+      </div>
+
       <div className="max-w-4xl mx-auto px-6">
         {state.stage !== "done" && <Hero />}
 
@@ -44,10 +96,7 @@ export default function HomePage() {
               <p className="font-bold text-deco-rose text-sm uppercase tracking-wider">分析失败</p>
               <p className="text-deco-ink/70 text-sm mt-1">{state.message}</p>
             </div>
-            <button
-              onClick={handleReset}
-              className="mt-4 text-sm font-bold text-deco-navy hover:text-deco-brass transition-colors underline decoration-deco-brass decoration-2 underline-offset-4"
-            >
+            <button onClick={handleReset} className="mt-4 text-sm font-bold text-deco-navy hover:text-deco-brass transition-colors underline decoration-deco-brass decoration-2 underline-offset-4">
               重试
             </button>
           </div>
@@ -56,10 +105,7 @@ export default function HomePage() {
         {state.stage === "done" && (
           <>
             <div className="text-center mt-6 mb-2">
-              <button
-                onClick={handleReset}
-                className="text-sm font-bold text-deco-navy hover:text-deco-brass transition-colors underline decoration-deco-brass decoration-2 underline-offset-4"
-              >
+              <button onClick={handleReset} className="text-sm font-bold text-deco-navy hover:text-deco-brass transition-colors underline decoration-deco-brass decoration-2 underline-offset-4">
                 分析另一份简历
               </button>
             </div>
@@ -74,6 +120,8 @@ export default function HomePage() {
         </div>
         AI 简历分析器 &mdash; 由 DeepSeek 驱动
       </footer>
+
+      {showHistory && <HistoryPanel onSelect={handleHistorySelect} onClose={() => setShowHistory(false)} />}
     </main>
   );
 }
