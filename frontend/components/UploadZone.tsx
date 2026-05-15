@@ -82,11 +82,11 @@ export default function UploadZone({ onFileSelect, disabled }: UploadZoneProps) 
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        className={`relative rounded-lg border-2 border-dashed p-14 text-center cursor-pointer transition-colors ${
+        className={`relative rounded p-14 text-center cursor-pointer transition-all duration-200 ${
           dragOver && !disabled
-            ? "border-amber-500 bg-amber-50"
-            : "border-ink-200 hover:border-ink-400 bg-white"
-        } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+            ? "border-2 border-deco-brass bg-deco-brass/5 scale-[1.02]"
+            : "border-2 border-dashed border-deco-warmgray/40 bg-white hover:border-deco-brass/50 gold-leaf"
+        } ${disabled ? "opacity-40 cursor-not-allowed" : ""}`}
       >
         <input
           ref={inputRef}
@@ -97,19 +97,27 @@ export default function UploadZone({ onFileSelect, disabled }: UploadZoneProps) 
           disabled={disabled}
         />
 
+        {/* Corner ornaments */}
+        <div className="absolute top-3 left-3 w-3 h-3 border-t-2 border-l-2 border-deco-brass/40" />
+        <div className="absolute top-3 right-3 w-3 h-3 border-t-2 border-r-2 border-deco-brass/40" />
+        <div className="absolute bottom-3 left-3 w-3 h-3 border-b-2 border-l-2 border-deco-brass/40" />
+        <div className="absolute bottom-3 right-3 w-3 h-3 border-b-2 border-r-2 border-deco-brass/40" />
+
         {selectedFile ? (
           <div className="flex flex-col items-center gap-3">
-            <div className="w-12 h-12 rounded-lg bg-amber-50 flex items-center justify-center">
-              <FileText className="w-6 h-6 text-amber-600" />
+            <div className="w-14 h-14 flex items-center justify-center">
+              <FileText className="w-7 h-7 text-deco-navy" />
             </div>
-            <p className="font-semibold text-ink-900">{selectedFile.name}</p>
-            <p className="text-sm text-ink-400">
+            <p className="font-bold text-deco-navy text-lg" style={{ fontFamily: "'Noto Serif SC', serif" }}>
+              {selectedFile.name}
+            </p>
+            <p className="text-sm text-deco-warmgray">
               {(selectedFile.size / 1024).toFixed(1)} KB
             </p>
             {!disabled && (
               <button
                 onClick={(e) => { e.stopPropagation(); clearFile(); }}
-                className="mt-1 text-sm text-ink-400 hover:text-red-500 flex items-center gap-1 transition-colors"
+                className="mt-1 text-sm text-deco-rose hover:text-deco-copper flex items-center gap-1 transition-colors font-medium"
               >
                 <X className="w-3 h-3" />
                 移除
@@ -118,12 +126,14 @@ export default function UploadZone({ onFileSelect, disabled }: UploadZoneProps) 
           </div>
         ) : (
           <div className="flex flex-col items-center gap-4">
-            <div className="w-12 h-12 rounded-lg bg-ink-100 flex items-center justify-center">
-              <Upload className="w-6 h-6 text-ink-400" />
+            <div className="w-14 h-14 flex items-center justify-center">
+              <Upload className="w-7 h-7 text-deco-navy" />
             </div>
             <div>
-              <p className="font-semibold text-ink-900">拖拽 PDF 到此处</p>
-              <p className="text-sm text-ink-400 mt-1">
+              <p className="font-bold text-deco-navy text-xl" style={{ fontFamily: "'Noto Serif SC', serif" }}>
+                拖拽 PDF 到此处
+              </p>
+              <p className="text-sm text-deco-warmgray mt-1">
                 或点击选择文件 — 最大 {MAX_FILE_SIZE_MB}MB
               </p>
             </div>
@@ -132,7 +142,9 @@ export default function UploadZone({ onFileSelect, disabled }: UploadZoneProps) 
       </div>
 
       {error && (
-        <p className="mt-3 text-sm text-red-600">{error}</p>
+        <div className="mt-3 border border-deco-rose bg-deco-rose/5 p-3">
+          <p className="text-sm text-deco-rose font-medium">{error}</p>
+        </div>
       )}
     </div>
   );

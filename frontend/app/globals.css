@@ -2,13 +2,57 @@
 @tailwind components;
 @tailwind utilities;
 
-::-webkit-scrollbar {
-  width: 4px;
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,500&family=Noto+Serif+SC:wght@400;600;700;900&display=swap');
+
+@layer base {
+  body {
+    font-family: "Noto Serif SC", "Georgia", "Times New Roman", serif;
+  }
 }
-::-webkit-scrollbar-track {
-  background: transparent;
+
+/* Art Deco geometric divider */
+.deco-divider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-::-webkit-scrollbar-thumb {
-  background: #d6d3d1;
-  border-radius: 2px;
+.deco-divider::before,
+.deco-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #c8a951, transparent);
 }
+.deco-diamond {
+  width: 6px; height: 6px;
+  background: #c8a951;
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+
+/* Stepped border — Art Deco building silhouette */
+.stepped-border {
+  border: 2px solid #c8a951;
+  box-shadow:
+    4px 4px 0 0 rgba(26,39,68,0.08),
+    8px 8px 0 0 rgba(26,39,68,0.04);
+}
+
+/* Gold leaf hover */
+.gold-leaf {
+  transition: all 0.2s ease;
+}
+.gold-leaf:hover {
+  box-shadow: 4px 4px 0 0 rgba(200,169,81,0.3), 8px 8px 0 0 rgba(200,169,81,0.1);
+  transform: translateY(-2px);
+}
+
+/* Score ring */
+@keyframes drawScore {
+  to { stroke-dashoffset: var(--target); }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #f5f0e8; }
+::-webkit-scrollbar-thumb { background: #c8a951; border-radius: 0; }
