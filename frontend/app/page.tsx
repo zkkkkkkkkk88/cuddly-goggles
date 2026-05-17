@@ -17,6 +17,7 @@ export default function HomePage() {
   const [mounted, setMounted] = useState(false);
   const [state, setState] = useState<AnalysisState>({ stage: "idle" });
   const [showHistory, setShowHistory] = useState(false);
+  const [renderKey, setRenderKey] = useState(0);
 
   useEffect(() => {
     if (!isLoggedIn()) {
@@ -28,7 +29,7 @@ export default function HomePage() {
   }, [router]);
 
   const handleFileSelect = useCallback((file: File) => {
-    runAnalysis(file, setState);
+    runAnalysis(file, (s) => { setState(s); if (s.stage === "done") setRenderKey(k => k + 1); });
   }, []);
 
   const handleReset = () => setState({ stage: "idle" });
@@ -42,6 +43,7 @@ export default function HomePage() {
   const handleHistorySelect = (result: AnalysisResultType) => {
     setShowHistory(false);
     setState({ stage: "done", result });
+    setRenderKey(k => k + 1);
   };
 
   if (!mounted) return null;
@@ -109,7 +111,7 @@ export default function HomePage() {
                 分析另一份简历
               </button>
             </div>
-            <AnalysisResult result={state.result} />
+            <AnalysisResult key={renderKey} result={state.result} />
           </>
         )}
       </div>

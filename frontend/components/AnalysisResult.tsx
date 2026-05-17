@@ -1,8 +1,11 @@
+"use client";
+
+import { useState } from "react";
 import type { AnalysisResult as AnalysisResultType } from "@/lib/api";
 import ScoreCard from "./ScoreCard";
 import SectionCard from "./SectionCard";
 import OptimizedResume from "./OptimizedResume";
-import { ThumbsUp, ThumbsDown, Lightbulb, ShieldCheck, Tag } from "lucide-react";
+import { ThumbsUp, ThumbsDown, Lightbulb, ShieldCheck, Tag, ChevronDown, ChevronUp } from "lucide-react";
 
 interface AnalysisResultProps {
   result: AnalysisResultType;
@@ -15,20 +18,14 @@ function atsAccent(text: string): "brass" | "rose" | "sage" {
 }
 
 export default function AnalysisResult({ result }: AnalysisResultProps) {
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
   return (
     <div className="relative max-w-3xl mx-auto mt-10 space-y-5">
-      <div className="animate-enter">
-        <ScoreCard score={result.score} />
-      </div>
+      {/* ====== 核心区域：所有人都会看 ====== */}
 
       <div className="animate-enter-1">
-        <SectionCard
-          title="ATS 兼容性"
-          icon={<ShieldCheck className="w-4 h-4" />}
-          accent={atsAccent(result.ats_compatibility)}
-        >
-          <p className="font-semibold text-base">{result.ats_compatibility}</p>
-        </SectionCard>
+        <ScoreCard score={result.score} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 animate-enter-1">
@@ -56,18 +53,6 @@ export default function AnalysisResult({ result }: AnalysisResultProps) {
       </div>
 
       <div className="animate-enter-2">
-        <SectionCard title="缺失关键词" icon={<Tag className="w-4 h-4" />} accent="brass">
-          <div className="flex flex-wrap gap-2">
-            {result.missing_keywords.map((kw, i) => (
-              <span key={i} className="px-3 py-1.5 border border-deco-brass/30 bg-deco-pearl text-deco-navy text-xs font-semibold hover:border-deco-brass hover:bg-deco-brass/10 transition-colors cursor-default">
-                {kw}
-              </span>
-            ))}
-          </div>
-        </SectionCard>
-      </div>
-
-      <div className="animate-enter-2">
         <SectionCard title="改进建议" icon={<Lightbulb className="w-4 h-4" />} accent="brass">
           <ol className="space-y-3 list-none">
             {result.improvement_suggestions.map((s, i) => (
@@ -85,6 +70,57 @@ export default function AnalysisResult({ result }: AnalysisResultProps) {
 
       <div className="animate-enter-2">
         <OptimizedResume content={result.optimized_resume} />
+      </div>
+
+      {/* ====== 高级分析：少数人会看，默认折叠 ====== */}
+
+      <div className="animate-enter-2 border border-deco-warmgray/20 bg-deco-pearl/30 rounded overflow-hidden">
+        <button
+          onClick={() => setShowAdvanced(!showAdvanced)}
+          className="w-full flex items-center justify-between px-5 py-3 text-left hover:bg-deco-warmgray/5 transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-deco-warmgray" />
+            <span className="text-xs font-bold text-deco-warmgray uppercase tracking-widest">
+              高级分析（ATS + 关键词）
+            </span>
+            <span className="text-[10px] text-deco-warmgray/60 font-medium">
+              {showAdvanced ? "收起" : "展开"}
+            </span>
+          </div>
+          {showAdvanced ? (
+            <ChevronUp className="w-4 h-4 text-deco-warmgray" />
+          ) : (
+            <ChevronDown className="w-4 h-4 text-deco-warmgray" />
+          )}
+        </button>
+
+        {showAdvanced && (
+          <div className="px-5 pb-5 space-y-4">
+            <div className="pt-4">
+              <h4 className="text-xs font-bold text-deco-navy uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <ShieldCheck className="w-3 h-3" /> ATS 兼容性
+              </h4>
+              <p className="text-sm text-deco-ink/75">{result.ats_compatibility}</p>
+            </div>
+
+            <div className="border-t border-deco-warmgray/15 pt-4">
+              <h4 className="text-xs font-bold text-deco-navy uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <Tag className="w-3 h-3" /> 缺失关键词
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {result.missing_keywords.map((kw, i) => (
+                  <span key={i} className="px-2.5 py-1 border border-deco-warmgray/30 bg-white text-deco-warmgray text-xs font-medium">
+                    {kw}
+                  </span>
+                ))}
+              </div>
+              <p className="text-[11px] text-deco-warmgray/60 mt-2">
+                仅列出可能缺失的关键词，请根据实际情况判断是否补充
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
