@@ -20,3 +20,5 @@ node_modules/
 .DS_Store
 Thumbs.db
 resume_ai.db
+docs/generate_doc.py
+docs/AI_Resume_Analyzer_深度技术文档.docx
