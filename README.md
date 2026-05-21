@@ -13,7 +13,9 @@ Upload your PDF resume and get instant AI-powered analysis — scoring, ATS comp
 - AI optimization: senior interviewer perspective, expands and polishes resume content while staying faithful to original
 - User system: register, login, JWT authentication
 - History: view, restore, and delete past analyses
-- Art Deco inspired UI with responsive design
+- Resume builder: online form editor with auto-save, live template preview, PDF export
+- Profile persistence: resume builder data bound to user account, survives logout/login
+- Sidebar navigation with Art Deco inspired UI
 
 ---
 
@@ -32,11 +34,13 @@ resume-ai/
 │   │   ├── models/
 │   │   │   ├── user.py               # User model
 │   │   │   ├── resume.py             # Resume model
-│   │   │   └── analysis.py           # Analysis model
+│   │   │   ├── analysis.py           # Analysis model
+│   │   │   └── resume_profile.py     # Resume builder profile model
 │   │   ├── routes/
 │   │   │   ├── auth.py               # POST /api/auth/register, /login
 │   │   │   ├── upload.py             # POST /api/upload (auth protected)
-│   │   │   └── history.py            # GET/DELETE /api/history
+│   │   │   ├── history.py            # GET/DELETE /api/history
+│   │   │   └── profile.py            # GET/PUT /api/profile
 │   │   ├── schemas/
 │   │   │   └── user.py               # Auth request/response models
 │   │   ├── services/
@@ -52,6 +56,7 @@ resume-ai/
 │   │   ├── layout.tsx                # Root layout
 │   │   ├── page.tsx                  # Main page (auth guard + upload)
 │   │   ├── login/page.tsx            # Login/Register page
+│   │   ├── builder/page.tsx          # Resume builder (edit + preview tabs)
 │   │   └── globals.css               # Tailwind + Art Deco styles
 │   ├── components/
 │   │   ├── Hero.tsx                  # Hero section
@@ -60,9 +65,13 @@ resume-ai/
 │   │   ├── ScoreCard.tsx             # Score ring display
 │   │   ├── SectionCard.tsx           # Reusable card component
 │   │   ├── OptimizedResume.tsx       # Optimized resume display
-│   │   └── HistoryPanel.tsx          # History sidebar
+│   │   ├── HistoryPanel.tsx          # History sidebar
+│   │   ├── BuilderForm.tsx           # Resume form (15+ fields)
+│   │   └── ResumeTemplate.tsx        # A4 template preview
 │   ├── lib/
-│   │   └── api.ts                    # API client + types
+│   │   ├── api.ts                    # API client + types
+│   │   ├── builder-data.ts           # Builder types + defaults
+│   │   └── profile-api.ts            # Profile save/load API client
 │   ├── services/
 │   │   ├── auth.ts                   # JWT token management + auth API
 │   │   └── analyze.ts                # Analysis state machine
@@ -168,6 +177,18 @@ Open: http://localhost:3000
 | `GET` | `/api/history?skip=0&limit=20` | Yes | List user's analyses |
 | `GET` | `/api/history/{id}` | Yes | Get analysis detail |
 | `DELETE` | `/api/history/{id}` | Yes | Delete a record |
+
+### Profile (Resume Builder)
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `GET` | `/api/profile` | Yes | Get saved resume builder data |
+| `PUT` | `/api/profile` | Yes | Save resume builder data |
+
+**PUT Request:** `application/json` + `Authorization` header
+```json
+{"data": {"name": "...", "school": "...", "skills": ["..."], ...}}
+```
 
 ### Health
 
