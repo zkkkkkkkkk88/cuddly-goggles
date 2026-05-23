@@ -13,7 +13,8 @@ Upload your PDF resume and get instant AI-powered analysis — scoring, ATS comp
 - AI optimization: senior interviewer perspective, expands and polishes resume content while staying faithful to original
 - User system: register, login, JWT authentication
 - History: view, restore, and delete past analyses
-- Resume builder: online form editor with auto-save, live template preview, PDF export
+- Resume builder: online form editor with auto-save, 4 templates (Art Deco / Swiss / Luxury / Wabi-Sabi)
+- Export: PDF (browser print) + Word (.docx, template-aware)
 - Profile persistence: resume builder data bound to user account, survives logout/login
 - Sidebar navigation with Art Deco inspired UI
 
@@ -40,7 +41,8 @@ resume-ai/
 │   │   │   ├── auth.py               # POST /api/auth/register, /login
 │   │   │   ├── upload.py             # POST /api/upload (auth protected)
 │   │   │   ├── history.py            # GET/DELETE /api/history
-│   │   │   └── profile.py            # GET/PUT /api/profile
+│   │   │   ├── profile.py            # GET/PUT /api/profile
+│   │   │   └── export_docx.py        # POST /api/export-docx (Word export)
 │   │   ├── schemas/
 │   │   │   └── user.py               # Auth request/response models
 │   │   ├── services/
@@ -67,7 +69,10 @@ resume-ai/
 │   │   ├── OptimizedResume.tsx       # Optimized resume display
 │   │   ├── HistoryPanel.tsx          # History sidebar
 │   │   ├── BuilderForm.tsx           # Resume form (15+ fields)
-│   │   └── ResumeTemplate.tsx        # A4 template preview
+│   │   ├── ResumeTemplate.tsx        # Art Deco template
+│   │   ├── SwissTemplate.tsx         # Swiss tech template
+│   │   ├── LuxuryTemplate.tsx        # Luxury finance template
+│   │   └── WabiSabiTemplate.tsx      # Wabi-Sabi creative template
 │   ├── lib/
 │   │   ├── api.ts                    # API client + types
 │   │   ├── builder-data.ts           # Builder types + defaults
