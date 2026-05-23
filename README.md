@@ -195,11 +195,45 @@ Open: http://localhost:3000
 {"data": {"name": "...", "school": "...", "skills": ["..."], ...}}
 ```
 
+### Word Export
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `POST` | `/api/export-docx` | No | Generate .docx resume |
+
+**PUT Request:** `application/json`
+```json
+{"data": {...}, "template": "deco|swiss|luxury|wabisabi"}
+```
+
 ### Health
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
 | `GET` | `/api/health` | No | Health check |
+
+---
+
+## Resume Templates
+
+| Template | Style | Best For |
+|----------|-------|----------|
+| **Art Deco** | Navy + brass gold, serif fonts, bordered cards | General purpose |
+| **Swiss Tech** | White + tech blue, Inter font, two-column clean | Internet / Tech |
+| **Luxury** | Warm cream + dark brown + champagne gold, centered layout | Finance / Consulting |
+| **Wabi-Sabi** | Ash white + charcoal + indigo, asymmetric, handcrafted feel | Design / Education / Creative |
+
+Templates apply to both PDF and Word exports. Switch templates in the builder's "导出简历" tab.
+
+---
+
+## PDF Requirements
+
+- **Must be text-based PDF** (not scanned images). PyMuPDF extracts text — if the PDF is a photo/scan with no embedded text, analysis will fail.
+- Supports **multi-page** PDFs
+- Supports **Chinese and English** (CJK fonts)
+- Max file size: **10MB**
+- Only `.pdf` files accepted
 
 ---
 
@@ -256,3 +290,13 @@ Open: http://localhost:3000
 - File type restricted to PDF, size limited to 10MB
 - CORS configured for specified origins
 - SQLite database excluded from git
+
+---
+
+## Important Notes
+
+- **Token consumption**: Each PDF analysis consumes ~5000-8000 DeepSeek tokens (two API calls). Other features (auth, history, profile, export) do not consume any tokens.
+- **Scanned PDFs**: Image-based PDFs (scans, photos) have no extractable text. Use text-based PDFs only.
+- **API key safety**: Never commit `.env` files. The `.env.example` file in this repo uses a placeholder key — replace with your own.
+- **Production**: Change `JWT_SECRET` and switch to PostgreSQL before deploying. Current default JWT secret is insecure.
+- **Word export**: Uses `python-docx` for server-side generation. Templates affect colors, fonts, and layout structure.
