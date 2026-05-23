@@ -10,13 +10,6 @@ import { ThumbsUp, ThumbsDown, Lightbulb, ShieldCheck, Tag, ChevronDown, Chevron
 interface AnalysisResultProps {
   result: AnalysisResultType;
 }
-
-function atsAccent(text: string): "brass" | "rose" | "sage" {
-  if (text.includes("High") || text.includes("高")) return "sage";
-  if (text.includes("Low") || text.includes("低")) return "rose";
-  return "brass";
-}
-
 export default function AnalysisResult({ result }: AnalysisResultProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
 

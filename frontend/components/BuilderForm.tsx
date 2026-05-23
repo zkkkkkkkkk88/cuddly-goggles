@@ -1,8 +1,9 @@
 "use client";
 
-import { Plus, Trash2 } from "lucide-react";
-import type { ResumeData, WorkExperience, ProjectExperience, Honor } from "@/lib/builder-data";
-import { emptyWork, emptyProject, emptyHonor } from "@/lib/builder-data";
+import { useRef } from "react";
+import { Plus, Trash2, Upload } from "lucide-react";
+import type { ResumeData, WorkExperience, Education, ProjectExperience, Honor } from "@/lib/builder-data";
+import { emptyWork, emptyEducation, emptyProject, emptyHonor } from "@/lib/builder-data";
 
 interface Props {
   data: ResumeData;
@@ -16,34 +17,56 @@ export default function BuilderForm({ data, onChange }: Props) {
     <div className="space-y-6 h-full overflow-auto pr-2" style={{ maxHeight: "calc(100vh - 140px)" }}>
       {/* 基本信息 */}
       <Section title="基本信息">
+        <div className="flex items-start gap-4 mb-3">
+          {/* Avatar */}
+          <div>
+            <label className="block text-[11px] font-bold text-deco-warmgray mb-1">头像</label>
+            <AvatarUpload avatar={data.avatar} onChange={v => update({ avatar: v })} />
+          </div>
+          <div className="flex-1 space-y-2">
+            <Row>
+              <Field label="姓名" value={data.name} onChange={v => update({ name: v })} />
+              <SelectField label="性别" value={data.gender} onChange={v => update({ gender: v })} options={["", "男", "女"]} />
+            </Row>
+          </div>
+        </div>
         <Row>
-          <Field label="姓名" value={data.name} onChange={v => update({ name: v })} />
-          <Field label="性别" value={data.gender} onChange={v => update({ gender: v })} placeholder="男/女" />
-        </Row>
-        <Row>
-          <Field label="出生年月" value={data.birthDate} onChange={v => update({ birthDate: v })} placeholder="2000-01" />
+          <div>
+            <label className="block text-[11px] font-bold text-deco-warmgray mb-1">出生年月</label>
+            <input type="date" value={data.birthDate} onChange={e => update({ birthDate: e.target.value })}
+              className="w-full border border-deco-warmgray/30 bg-deco-pearl/30 px-3 py-2 text-sm text-deco-ink outline-none focus:border-deco-brass" />
+          </div>
           <Field label="出生地" value={data.birthPlace} onChange={v => update({ birthPlace: v })} />
         </Row>
         <Row>
           <Field label="邮箱" value={data.email} onChange={v => update({ email: v })} placeholder="your@email.com" />
           <Field label="电话" value={data.phone} onChange={v => update({ phone: v })} />
         </Row>
+        <Row>
+          <SelectField label="求职状态" value={data.jobStatus} onChange={v => update({ jobStatus: v })} options={["", "随时到岗", "考虑中", "在职看机会"]} />
+          <Field label="现居" value={data.currentCity} onChange={v => update({ currentCity: v })} placeholder="如：北京" />
+        </Row>
+        <Row>
+          <Field label="期望城市" value={data.targetCity} onChange={v => update({ targetCity: v })} placeholder="如：上海" />
+          <div />
+        </Row>
       </Section>
 
       {/* 教育背景 */}
       <Section title="教育背景">
-        <Row>
-          <Field label="身份" value={data.identity} onChange={v => update({ identity: v })} placeholder="应届/在职" />
-          <Field label="毕业年份" value={data.gradYear} onChange={v => update({ gradYear: v })} placeholder="2026" />
-        </Row>
-        <Row>
-          <Field label="学校" value={data.school} onChange={v => update({ school: v })} />
-          <Field label="专业" value={data.major} onChange={v => update({ major: v })} />
-        </Row>
-        <Row>
-          <Field label="学历" value={data.education} onChange={v => update({ education: v })} placeholder="大专/本科/硕士" />
-          <Field label="求职状态" value={data.jobStatus} onChange={v => update({ jobStatus: v })} placeholder="随时到岗/考虑中" />
-        </Row>
+        {data.educations.map((e, i) => (
+          <EducationItem key={e.id} item={e} index={i}
+            onChange={v => update({ educations: data.educations.map((x, j) => j === i ? v : x) })}
+            onDelete={() => update({ educations: data.educations.filter((_, j) => j !== i) })} />
+        ))}
+        <AddBtn onClick={() => update({ educations: [...data.educations, emptyEducation()] })} label="添加教育经历" />
+      </Section>
+
+      {/* 个人优势 */}
+      <Section title="个人优势">
+        <textarea value={data.personalStrengths} onChange={e => update({ personalStrengths: e.target.value })}
+          placeholder="例如：自学能力强，善于沟通协作..."
+          className="w-full border border-deco-warmgray/30 bg-deco-pearl/30 px-3 py-2 text-sm text-deco-ink outline-none focus:border-deco-brass h-24 resize-y" />
       </Section>
 
       {/* 技能标签 */}
@@ -131,6 +154,38 @@ function AddBtn({ onClick, label }: { onClick: () => void; label: string }) {
   );
 }
 
+function EducationItem({ item, index, onChange, onDelete }: {
+  item: Education; index: number; onChange: (v: Education) => void; onDelete: () => void;
+}) {
+  const years = ["", ...Array.from({length: 35}, (_, i) => String(new Date().getFullYear() + 5 - i))];
+  return (
+    <div className="border border-deco-warmgray/20 p-3 space-y-2 bg-white">
+      <div className="flex justify-between items-center">
+        <span className="text-xs font-bold text-deco-brass">教育经历 #{index + 1}</span>
+        <button onClick={onDelete} className="text-deco-rose hover:text-red-700"><Trash2 className="w-3 h-3" /></button>
+      </div>
+      <Row>
+        <Field label="学校" value={item.school} onChange={v => onChange({ ...item, school: v })} />
+        <Field label="专业" value={item.major} onChange={v => onChange({ ...item, major: v })} />
+      </Row>
+      <Row>
+        <SelectField label="学历" value={item.education} onChange={v => onChange({ ...item, education: v })} options={["", "大专", "本科", "硕士", "博士"]} />
+        <SelectField label="入学年份" value={item.startYear} onChange={v => onChange({ ...item, startYear: v })} options={years} />
+      </Row>
+      <Row>
+        <SelectField label="毕业年份" value={item.endYear} onChange={v => onChange({ ...item, endYear: v })} options={years} />
+        <div />
+      </Row>
+      <div>
+        <label className="block text-[11px] font-bold text-deco-warmgray mb-1">在校经历</label>
+        <textarea value={item.campusExperience} onChange={e => onChange({ ...item, campusExperience: e.target.value })}
+          placeholder="社团、学生会、竞赛、奖学金等在校活动..."
+          className="w-full border border-deco-warmgray/30 bg-deco-pearl/30 px-3 py-2 text-sm text-deco-ink outline-none focus:border-deco-brass h-20 resize-y" />
+      </div>
+    </div>
+  );
+}
+
 function WorkItem({ item, index, onChange, onDelete }: {
   item: WorkExperience; index: number; onChange: (v: WorkExperience) => void; onDelete: () => void;
 }) {
@@ -182,6 +237,53 @@ function HonorItem({ item, index, onChange, onDelete }: {
       <input value={item.date} onChange={e => onChange({ ...item, date: e.target.value })}
         placeholder="日期" className="w-28 border border-deco-warmgray/30 bg-deco-pearl/30 px-3 py-2 text-sm outline-none focus:border-deco-brass" />
       <button onClick={onDelete} className="text-deco-rose hover:text-red-700"><Trash2 className="w-3 h-3" /></button>
+    </div>
+  );
+}
+
+/* --- Select field with dropdown --- */
+function SelectField({ label, value, onChange, options }: {
+  label: string; value: string; onChange: (v: string) => void; options: string[];
+}) {
+  return (
+    <div>
+      <label className="block text-[11px] font-bold text-deco-warmgray mb-1">{label}</label>
+      <select value={value} onChange={e => onChange(e.target.value)}
+        className="w-full border border-deco-warmgray/30 bg-deco-pearl/30 px-3 py-2 text-sm text-deco-ink outline-none focus:border-deco-brass">
+        {options.map(opt => (
+          <option key={opt} value={opt}>{opt || "请选择"}</option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+/* --- Avatar upload with preview --- */
+function AvatarUpload({ avatar, onChange }: { avatar: string; onChange: (v: string) => void }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => onChange(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-1.5">
+      <div
+        onClick={() => inputRef.current?.click()}
+        className="w-16 h-16 border-2 border-dashed border-deco-warmgray/30 rounded-full flex items-center justify-center cursor-pointer hover:border-deco-brass transition-colors overflow-hidden bg-deco-pearl/30"
+      >
+        {avatar ? (
+          <img src={avatar} alt="" className="w-full h-full object-cover" />
+        ) : (
+          <Upload className="w-5 h-5 text-deco-warmgray" />
+        )}
+      </div>
+      <span className="text-[10px] text-deco-warmgray">点击上传</span>
+      <input ref={inputRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
     </div>
   );
 }

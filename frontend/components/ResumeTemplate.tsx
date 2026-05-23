@@ -6,8 +6,8 @@ interface Props {
 
 export default function ResumeTemplate({ data }: Props) {
   const hasContact = data.email || data.phone || data.birthPlace;
-  const hasBasic = data.gender || data.birthDate || data.identity || data.gradYear;
-  const hasEdu = data.school || data.major || data.education;
+  const hasBasic = data.gender || data.birthDate;
+  const hasEdu = data.educations.filter(e => e.school || e.major).length > 0;
   const hasWork = data.workExperience.filter(w => w.company || w.title).length > 0;
   const hasProjects = data.projects.filter(p => p.name).length > 0;
   const hasHonors = data.honors.filter(h => h.name).length > 0;
@@ -16,6 +16,9 @@ export default function ResumeTemplate({ data }: Props) {
     <div id="resume-print" className="bg-white text-deco-ink max-w-[210mm] mx-auto p-8 print-a4">
       {/* Header */}
       <div className="text-center border-b-2 border-deco-navy pb-4 mb-5">
+        {data.avatar && (
+          <img src={data.avatar} alt="" className="w-20 h-20 rounded-full object-cover mx-auto mb-3 border-2 border-deco-brass/30" />
+        )}
         {data.name && (
           <h1 className="text-2xl font-black text-deco-navy tracking-wide">{data.name}</h1>
         )}
@@ -36,18 +39,36 @@ export default function ResumeTemplate({ data }: Props) {
         <div className="flex gap-4 text-xs text-deco-warmgray mb-5 flex-wrap">
           {data.gender && <span>性别：{data.gender}</span>}
           {data.birthDate && <span>出生年月：{data.birthDate}</span>}
-          {data.identity && <span>身份：{data.identity}</span>}
-          {data.gradYear && <span>毕业年份：{data.gradYear}</span>}
+          {data.currentCity && <span>现居：{data.currentCity}</span>}
+          {data.targetCity && <span>期望城市：{data.targetCity}</span>}
         </div>
       )}
 
       {/* Education */}
       {hasEdu && (
         <Section title="教育背景">
-          <p className="text-sm font-bold">{data.school}{data.major ? ` · ${data.major}` : ""}</p>
-          <p className="text-xs text-deco-warmgray mt-0.5">
-            {data.education}{data.gradYear ? ` · ${data.gradYear}年毕业` : ""}
-          </p>
+          {data.educations.map((e, i) => (
+            (e.school || e.major) && (
+              <div key={e.id} className={i > 0 ? "mt-3 pt-3 border-t border-deco-warmgray/10" : ""}>
+                <p className="text-sm font-bold">
+                  {e.school}{e.major ? ` · ${e.major}` : ""}
+                </p>
+                <p className="text-xs text-deco-warmgray mt-0.5">
+                  {[e.education, e.startYear && e.endYear ? `${e.startYear}–${e.endYear}` : "", e.endYear ? `${e.endYear}年毕业` : ""].filter(Boolean).join(" · ")}
+                </p>
+                {e.campusExperience && (
+                  <p className="text-xs text-deco-ink/70 mt-1">{e.campusExperience}</p>
+                )}
+              </div>
+            )
+          ))}
+        </Section>
+      )}
+
+      {/* Personal Strengths */}
+      {data.personalStrengths && (
+        <Section title="个人优势">
+          <p className="text-xs text-deco-ink/75 leading-relaxed">{data.personalStrengths}</p>
         </Section>
       )}
 

@@ -25,6 +25,7 @@ export default function LoginPage() {
       const fn = mode === "login" ? login : register;
       const result = await fn(email, password);
       localStorage.setItem("resume_ai_email", result.email);
+      sessionStorage.removeItem("last_analysis");
       router.replace("/");
     } catch (err: any) {
       setError(err.message);

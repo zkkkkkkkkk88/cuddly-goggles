@@ -1,10 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { ArrowLeft, Printer, Check, Loader2 } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ArrowLeft, Printer, FileText, Check, Loader2 } from "lucide-react";
 import BuilderForm from "@/components/BuilderForm";
 import ResumeTemplate from "@/components/ResumeTemplate";
+import SwissTemplate from "@/components/SwissTemplate";
+import LuxuryTemplate from "@/components/LuxuryTemplate";
+import WabiSabiTemplate from "@/components/WabiSabiTemplate";
 import { defaultResumeData, ResumeData } from "@/lib/builder-data";
 import { fetchProfile, saveProfile } from "@/lib/profile-api";
 
@@ -12,11 +15,14 @@ type Tab = "edit" | "preview";
 
 export default function BuilderPage() {
   const router = useRouter();
-  const [tab, setTab] = useState<Tab>("edit");
+  const searchParams = useSearchParams();
+  const initialTab = (searchParams.get("tab") as Tab) || "edit";
+  const [tab, setTab] = useState<Tab>(initialTab);
   const [data, setData] = useState<ResumeData>(defaultResumeData);
   const [loaded, setLoaded] = useState(false);
   const [saving, setSaving] = useState<"idle" | "saving" | "saved">("idle");
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const [template, setTemplate] = useState<"deco" | "swiss" | "luxury" | "wabisabi">("deco");
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Load saved profile on mount
   useEffect(() => {
@@ -53,6 +59,22 @@ export default function BuilderPage() {
   };
 
   const handlePrint = () => window.print();
+
+  const handleExportWord = async () => {
+    const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001";
+    const res = await fetch(`${API}/api/export-docx`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ data, template }),
+    });
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "resume.docx";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   if (!loaded) return null;
 
@@ -94,9 +116,14 @@ export default function BuilderPage() {
               </span>
             )}
             {tab === "preview" && (
-              <button onClick={handlePrint} className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-bold bg-deco-navy text-deco-cream hover:bg-deco-brass hover:text-deco-navy transition-colors">
-                <Printer className="w-4 h-4" /> 导出 PDF
-              </button>
+              <div className="flex items-center gap-2">
+                <button onClick={handleExportWord} className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-bold border border-deco-navy text-deco-navy hover:bg-deco-navy hover:text-deco-cream transition-colors">
+                  <FileText className="w-4 h-4" /> 导出 Word
+                </button>
+                <button onClick={handlePrint} className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-bold bg-deco-navy text-deco-cream hover:bg-deco-brass hover:text-deco-navy transition-colors">
+                  <Printer className="w-4 h-4" /> 导出 PDF
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -110,9 +137,26 @@ export default function BuilderPage() {
           </div>
         </div>
       ) : (
-        <div className="max-w-4xl mx-auto p-6 flex justify-center">
-          <div className="bg-white shadow-lg" style={{ maxWidth: "210mm" }}>
-            <ResumeTemplate data={data} />
+        <div className="max-w-5xl mx-auto p-6 space-y-4">
+          {/* Template selector */}
+          <div className="flex items-center justify-center gap-2">
+            <span className="text-xs font-bold text-deco-warmgray mr-2">选择模板</span>
+            {(["deco", "swiss", "luxury", "wabisabi"] as const).map(t => (
+              <button key={t} onClick={() => setTemplate(t)}
+                className={`px-3 py-1.5 rounded text-xs font-bold transition-all ${template === t ? "bg-deco-navy text-deco-cream" : "text-deco-warmgray hover:text-deco-navy border border-deco-warmgray/20"}`}>
+                {{deco: "Art Deco", swiss: "Swiss 科技", luxury: "Luxury 金融", wabisabi: "侘寂 文创"}[t]}
+              </button>
+            ))}
+          </div>
+
+          {/* Selected template */}
+          <div className="flex justify-center">
+            <div className="bg-white shadow-lg" style={{ maxWidth: "210mm" }}>
+              {template === "deco" && <ResumeTemplate data={data} />}
+              {template === "swiss" && <SwissTemplate data={data} />}
+              {template === "luxury" && <LuxuryTemplate data={data} />}
+              {template === "wabisabi" && <WabiSabiTemplate data={data} />}
+            </div>
           </div>
         </div>
       )}

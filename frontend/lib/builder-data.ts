@@ -7,6 +7,16 @@ export interface WorkExperience {
   description: string;
 }
 
+export interface Education {
+  id: string;
+  school: string;
+  major: string;
+  education: string;  // 大专/本科/硕士/博士
+  startYear: string;
+  endYear: string;
+  campusExperience: string; // 在校经历
+}
+
 export interface ProjectExperience {
   id: string;
   name: string;
@@ -28,13 +38,12 @@ export interface ResumeData {
   birthPlace: string;
   email: string;
   phone: string;
-  identity: string;
-  gradYear: string;
-  school: string;
-  major: string;
-  education: string;
   jobStatus: string;
+  currentCity: string;
+  targetCity: string;
+  personalStrengths: string;
   skills: string[];
+  educations: Education[];
   workExperience: WorkExperience[];
   projects: ProjectExperience[];
   honors: Honor[];
@@ -42,6 +51,10 @@ export interface ResumeData {
 
 let _counter = 0;
 export const uid = () => String(++_counter);
+
+export const emptyEducation = (): Education => ({
+  id: uid(), school: "", major: "", education: "", startYear: "", endYear: "", campusExperience: "",
+});
 
 export const emptyWork = (): WorkExperience => ({
   id: uid(), company: "", title: "", startDate: "", endDate: "", description: "",
@@ -63,13 +76,12 @@ export const defaultResumeData: ResumeData = {
   birthPlace: "",
   email: "",
   phone: "",
-  identity: "",
-  gradYear: "",
-  school: "",
-  major: "",
-  education: "",
   jobStatus: "",
+  currentCity: "",
+  targetCity: "",
+  personalStrengths: "",
   skills: [],
+  educations: [],
   workExperience: [],
   projects: [],
   honors: [],
